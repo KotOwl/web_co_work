@@ -49,6 +49,7 @@ interface DashboardStats {
       icon: string;
       color: string;
     };
+    currency?: string;
   }>;
   budgets: Array<{
     id: number;
