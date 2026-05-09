@@ -37,14 +37,14 @@ export default function RegisterPage() {
 
     try {
       // Реєстрація
-      const user = await authApi.register(formData);
+      const userResponse = await authApi.register(formData);
 
       // Автоматичний вхід після реєстрації
-      const loginData = await authApi.login(formData.email, formData.password);
+      const loginResponse = await authApi.login(formData.email, formData.password);
 
       // Зберігаємо токен і користувача
-      setToken(loginData.access_token);
-      setUser(user);
+      setToken(loginResponse.data.access_token);
+      setUser(userResponse.data);
 
       // Редірект на дашборд
       router.push("/dashboard");
