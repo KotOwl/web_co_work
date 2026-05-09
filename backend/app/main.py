@@ -4,7 +4,10 @@ from sqlalchemy import text
 from app.database import engine, Base
 from app.routers import auth, users, transactions, categories, budgets, statistics
 
-# Create database tables and perform simple migrations
+# Create database tables first
+Base.metadata.create_all(bind=engine)
+
+# Perform simple migrations
 with engine.connect() as conn:
     # Check if currency column exists in transactions table
     try:
@@ -12,8 +15,6 @@ with engine.connect() as conn:
         conn.commit()
     except Exception as e:
         print(f"Migration notice: {e}")
-
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Finance Tracker API",
@@ -24,7 +25,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://localhost:3000"],
+    allow_origins=["*"], # For production, you can specify your render frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
