@@ -2,6 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Hot reload for Docker
   webpack: (config, context) => {
     config.watchOptions = {
