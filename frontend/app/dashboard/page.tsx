@@ -68,7 +68,14 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isChangingCurrency, setIsChangingCurrency] = useState(false);
+  const [isCurrencyMenuOpen, setIsCurrencyMenuOpen] = useState(false);
+
+  const currencies = [
+    { value: "UAH", label: "Гривня", symbol: "₴" },
+    { value: "USD", label: "Долар", symbol: "$" },
+    { value: "EUR", label: "Євро", symbol: "€" },
+    { value: "PLN", label: "Злотий", symbol: "zł" },
+  ];
 
   const fetchStats = async () => {
     try {
@@ -94,6 +101,7 @@ export default function DashboardPage() {
 
   const handleCurrencyChange = async (newCurrency: string) => {
     setIsChangingCurrency(true);
+    setIsCurrencyMenuOpen(false);
     try {
       const response = await userApi.updateProfile({ currency: newCurrency });
       setUser(response.data);
@@ -157,16 +165,59 @@ export default function DashboardPage() {
             <p className="text-muted-foreground">Ось огляд ваших фінансів</p>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <select
-              className="h-10 rounded-md border border-input bg-background px-3 font-medium cursor-pointer hover:bg-muted/50 transition-colors"
-              value={user?.currency || "UAH"}
-              onChange={(e) => handleCurrencyChange(e.target.value)}
-            >
-              <option value="UAH">₴ Гривня</option>
-              <option value="USD">$ Долар</option>
-              <option value="EUR">€ Євро</option>
-              <option value="PLN">zł Злотий</option>
-            </select>
+            <div className="relative">
+              <button
+                onClick={() => setIsCurrencyMenuOpen(!isCurrencyMenuOpen)}
+                className="h-10 flex items-center justify-between gap-3 px-4 rounded-xl border bg-card/50 backdrop-blur-sm hover:bg-muted/50 transition-all active:scale-95 font-medium shadow-sm"
+              >
+                <span className="w-6 h-6 flex items-center justify-center bg-primary/10 rounded-full text-primary text-xs font-bold">
+                  {currencies.find(c => c.value === (user?.currency || "UAH"))?.symbol}
+                </span>
+                <span className="hidden sm:inline">{currencies.find(c => c.value === (user?.currency || "UAH"))?.label}</span>
+                <span className="sm:hidden">{user?.currency || "UAH"}</span>
+                <svg
+                  className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isCurrencyMenuOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {isCurrencyMenuOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setIsCurrencyMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 top-12 w-48 bg-card/95 border rounded-xl shadow-2xl z-20 py-1 animate-scale-in origin-top-right overflow-hidden backdrop-blur-xl">
+                    {currencies.map((c) => (
+                      <button
+                        key={c.value}
+                        onClick={() => handleCurrencyChange(c.value)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors hover:bg-primary/5 ${
+                          user?.currency === c.value ? "bg-primary/5 text-primary font-bold" : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        <span className={`w-7 h-7 flex items-center justify-center rounded-full text-xs transition-colors ${
+                          user?.currency === c.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                        }`}>
+                          {c.symbol}
+                        </span>
+                        <div className="flex flex-col items-start">
+                          <span className="leading-none">{c.label}</span>
+                          <span className="text-[10px] opacity-50 uppercase mt-0.5">{c.value}</span>
+                        </div>
+                        {user?.currency === c.value && (
+                          <div className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
             <Button onClick={() => router.push("/transactions/new")} className="w-full sm:w-auto transition-transform hover:scale-[1.02] active:scale-[0.98]">
               + Додати транзакцію
             </Button>
