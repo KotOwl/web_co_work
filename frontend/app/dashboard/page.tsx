@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
-import { statsApi, transactionApi, budgetApi } from "@/lib/api";
+import { statsApi, transactionApi, budgetApi, userApi } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,36 +63,49 @@ interface DashboardStats {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { token, user } = useStore();
+  const { token, user, setUser } = useStore();
   const currency = user?.currency || "UAH";
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isChangingCurrency, setIsChangingCurrency] = useState(false);
+
+  const fetchStats = async () => {
+    try {
+      const [statsResp, budgetsResp] = await Promise.all([
+        statsApi.getDashboard(),
+        budgetApi.getAll(),
+      ]);
+      setStats({ ...statsResp.data, budgets: budgetsResp.data });
+    } catch (error) {
+      console.error("Failed to fetch stats:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!token) {
       router.push("/login");
       return;
     }
-
-    const fetchStats = async () => {
-      try {
-        const [statsResp, budgetsResp] = await Promise.all([
-          statsApi.getDashboard(),
-          budgetApi.getAll(),
-        ]);
-        setStats({ ...statsResp.data, budgets: budgetsResp.data });
-      } catch (error) {
-        console.error("Failed to fetch stats:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchStats();
   }, [token, router]);
 
-  if (isLoading) {
+  const handleCurrencyChange = async (newCurrency: string) => {
+    setIsChangingCurrency(true);
+    try {
+      const response = await userApi.updateProfile({ currency: newCurrency });
+      setUser(response.data);
+      await fetchStats();
+    } catch (err) {
+      console.error("Failed to update currency", err);
+    } finally {
+      setIsChangingCurrency(false);
+    }
+  };
+
+  if (isLoading && !stats) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -112,7 +125,7 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className={`space-y-6 ${isChangingCurrency ? "opacity-50 pointer-events-none" : ""}`}>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
           <div>
@@ -121,9 +134,21 @@ export default function DashboardPage() {
             </h1>
             <p className="text-muted-foreground">Ось огляд ваших фінансів</p>
           </div>
-          <Button onClick={() => router.push("/transactions/new")} className="w-full sm:w-auto transition-transform hover:scale-[1.02] active:scale-[0.98]">
-            + Додати транзакцію
-          </Button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 font-medium cursor-pointer hover:bg-muted/50 transition-colors"
+              value={user?.currency || "UAH"}
+              onChange={(e) => handleCurrencyChange(e.target.value)}
+            >
+              <option value="UAH">₴ Гривня</option>
+              <option value="USD">$ Долар</option>
+              <option value="EUR">€ Євро</option>
+              <option value="PLN">zł Злотий</option>
+            </select>
+            <Button onClick={() => router.push("/transactions/new")} className="w-full sm:w-auto transition-transform hover:scale-[1.02] active:scale-[0.98]">
+              + Додати транзакцію
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
