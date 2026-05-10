@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { authApi } from "@/lib/api";
+import { authApi, userApi } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,9 +39,9 @@ export default function LoginPage() {
       
       setToken(access_token);
       
-      // Get user profile
-      // const userResponse = await userApi.getProfile();
-      // setUser(userResponse.data);
+      // Fetch user profile immediately after login to ensure correct currency
+      const userResponse = await userApi.getProfile();
+      setUser(userResponse.data);
       
       router.push("/dashboard");
     } catch (err: any) {
