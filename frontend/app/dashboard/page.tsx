@@ -158,7 +158,7 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className={`space-y-6 ${isChangingCurrency ? "opacity-50 pointer-events-none" : ""}`}>
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in relative z-50">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in relative z-[100]">
           <div>
             <h1 className="text-3xl font-bold">
               Привіт, {user?.first_name || "Користувач"}!
@@ -189,10 +189,10 @@ export default function DashboardPage() {
               {isCurrencyMenuOpen && (
                 <>
                   <div 
-                    className="fixed inset-0 z-10" 
+                    className="fixed inset-0 z-50" 
                     onClick={() => setIsCurrencyMenuOpen(false)}
                   />
-                  <div className="absolute right-0 top-12 w-48 bg-card/95 border rounded-xl shadow-2xl z-20 py-1 animate-scale-in origin-top-right overflow-hidden backdrop-blur-xl">
+                  <div className="absolute right-0 top-12 w-48 bg-card/95 border rounded-xl shadow-2xl z-[100] py-1 animate-scale-in origin-top-right overflow-hidden backdrop-blur-xl">
                     {currencies.map((c) => (
                       <button
                         key={c.value}
