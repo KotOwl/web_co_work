@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { transactionApi, categoryApi } from "@/lib/api";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, convertAmount } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +27,7 @@ interface Transaction {
   type: "income" | "expense";
   description: string;
   date: string;
+  currency?: string;
   category: {
     id: number;
     name: string;
@@ -43,7 +44,7 @@ interface Category {
 
 export default function TransactionsPage() {
   const router = useRouter();
-  const { token, user } = useStore();
+  const { token, user, setUser } = useStore();
   const currency = user?.currency || "UAH";
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -53,6 +54,8 @@ export default function TransactionsPage() {
     "all",
   );
   const [filterCategory, setFilterCategory] = useState<string>("");
+  const [isCurrencyMenuOpen, setIsCurrencyMenuOpen] = useState(false);
+  const [isChangingCurrency, setIsChangingCurrency] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -99,10 +102,10 @@ export default function TransactionsPage() {
 
   const totalIncome = filteredTransactions
     .filter((t) => t.type === "income")
-    .reduce((sum, t) => sum + t.amount, 0);
+    .reduce((sum, t) => sum + convertAmount(t.amount, t.currency || "UAH", currency), 0);
   const totalExpense = filteredTransactions
     .filter((t) => t.type === "expense")
-    .reduce((sum, t) => sum + t.amount, 0);
+    .reduce((sum, t) => sum + convertAmount(t.amount, t.currency || "UAH", currency), 0);
 
   return (
     <DashboardLayout>
