@@ -107,9 +107,31 @@ export default function DashboardPage() {
 
   if (isLoading && !stats) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
+      <DashboardLayout>
+        <div className="space-y-6">
+          {/* Skeleton Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-2">
+              <div className="h-8 w-64 bg-muted rounded-md animate-pulse"></div>
+              <div className="h-4 w-48 bg-muted rounded-md animate-pulse"></div>
+            </div>
+            <div className="h-10 w-full sm:w-48 bg-muted rounded-md animate-pulse"></div>
+          </div>
+          
+          {/* Skeleton Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-28 bg-muted rounded-xl animate-pulse"></div>
+            ))}
+          </div>
+          
+          {/* Skeleton Charts/Lists */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <div className="h-80 bg-muted rounded-xl animate-pulse"></div>
+            <div className="h-80 bg-muted rounded-xl animate-pulse"></div>
+          </div>
+        </div>
+      </DashboardLayout>
     );
   }
 
