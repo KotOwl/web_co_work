@@ -101,7 +101,7 @@ def create_default_categories(db: Session, user_id: int):
 
 def get_categories(db: Session, user_id: int, type: Optional[TransactionType] = None):
     query = db.query(Category).filter(
-        and_(Category.user_id == user_id, Category.is_default == True)
+        Category.user_id == user_id
     )
     if type:
         query = query.filter(Category.type == type)

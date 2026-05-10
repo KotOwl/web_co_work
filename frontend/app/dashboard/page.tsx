@@ -114,14 +114,14 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
           <div>
             <h1 className="text-3xl font-bold">
               Привіт, {user?.first_name || "Користувач"}!
             </h1>
             <p className="text-muted-foreground">Ось огляд ваших фінансів</p>
           </div>
-          <Button onClick={() => router.push("/transactions/new")} className="transition-transform hover:scale-105 active:scale-95">
+          <Button onClick={() => router.push("/transactions/new")} className="w-full sm:w-auto transition-transform hover:scale-[1.02] active:scale-[0.98]">
             + Додати транзакцію
           </Button>
         </div>
